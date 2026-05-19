@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>💌 匿名表白墙 · 悄悄话公开栏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #ffe6f0 0%, #ffe0f7 30%, #fde8ff 70%, #ffe4e9 100%);
+            font-family: 'Segoe UI', 'Inter', 'PingFang SC', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem;
+            position: relative;
+        }
+
+        /* 爱心浮动背景 */
+        body::before {
+            content: "❤️💕💗💖💘💝";
+            position: fixed;
+            top: 10%;
+            left: 5%;
+            font-size: 2.5rem;
+            opacity: 0.15;
+            white-space: pre-wrap;
+            pointer-events: none;
+            transform: rotate(-5deg);
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 750px;
+            width: 100%;
+            background: rgba(255, 245, 250, 0.8);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 3rem;
+            padding: 2.2rem 1.8rem;
+            box-shadow: 0 30px 50px rgba(233, 30, 99, 0.2), 0 10px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.3rem;
+            font-weight: 700;
+            color: #c2185b;
+            margin-bottom: 0.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .sub-header {
+            text-align: center;
+            color: #d44a7a;
+            margin-bottom: 2.2rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-bottom: 2px dashed #f8bbd0;
+            padding-bottom: 1.2rem;
+        }
+
+        /* 选项卡 */
+        .tabs {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.4rem;
+            border-radius: 60px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 50px;
+            font-weight: 650;
+            font-size: 1rem;
+            color: #ad1457;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #e91e63, #c2185b);
+            color: white;
+            box-shadow: 0 10px 20px rgba(233, 30, 99, 0.4);
+        }
+
+        .panel {
+            display: none;
+            animation: fade 0.3s ease;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes fade {
+            from { opacity: 0.5; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 表单卡片 */
+        .message-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            padding: 1.6rem;
+            border: 1px solid #fce4ec;
+            box-shadow: 0 10px 18px rgba(0,0,0,0.03);
+        }
+
+        .input-group {
+            margin-bottom: 1.3rem;
+        }
+
+        label {
+            font-weight: 650;
+            color: #880e4f;
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border-radius: 30px;
+            border: 1px solid #f8bbd0;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        textarea {
+            border-radius: 25px;
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #e91e63;
+            box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.15);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #e91e63, #ad1457);
+            border: none;
+            color: white;
+            padding: 0.9rem 2rem;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.25s;
+            box-shadow: 0 12px 20px -10px rgba(233, 30, 99, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #d81b60, #880e4f);
+            transform: scale(1.02);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #c2185b;
+            border: 2px solid #f8bbd0;
+            box-shadow: none;
+            margin-top: 0.8rem;
+        }
+
+        .btn-secondary:hover {
+            background: #fce4ec;
+        }
+
+        /* 表白列表 / 搜索结果 */
+        .messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.2rem;
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 0.3rem;
+        }
+
+        .message-bubble {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 1.8rem;
+            padding: 1.2rem 1.4rem;
+            border: 1px solid #ffdae5;
+            box-shadow: 0 8px 14px rgba(233, 30, 99, 0.08);
+            transition: 0.2s;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            color: #ad1457;
+            font-weight: 650;
+        }
+
+        .to-name {
+            background: #fce4ec;
+            padding: 0.25rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #880e4f;
+        }
+
+        .message-text {
+            font-size: 1rem;
+            color: #4a2542;
+            margin: 0.6rem 0 0.4rem;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: #b0809a;
+            text-align: right;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem;
+            color: #b34e6e;
+            background: rgba(255,255,240,0.6);
+            border-radius: 2rem;
+        }
+
+        .search-highlight {
+            background: #f8bbd0;
+            border-radius: 4px;
+            padding: 0 4px;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 1.8rem 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>
+        <i class="fas fa-heart" style="color: #e91e63;"></i> 匿名表白墙
+    </h1>
+    <div class="sub-header">
+        <i class="fas fa-lock"></i> 悄悄写下心意 · 搜索你的名字发现惊喜
+    </div>
+
+    <!-- 选项卡切换 -->
+    <div class="tabs">
+        <button class="tab-btn active" id="tabWriteBtn"><i class="fas fa-pen-fancy"></i> 写表白</button>
+        <button class="tab-btn" id="tabSearchBtn"><i class="fas fa-search"></i> 搜表白</button>
+    </div>
+
+    <!-- 写表白面板 -->
+    <div class="panel active" id="writePanel">
+        <div class="message-card">
+            <div class="input-group">
+                <label><i class="fas fa-user-heart"></i> 表白对象（对方的名字/昵称）</label>
+                <input type="text" id="toNameInput" placeholder="例如：小明、图书馆靠窗的女孩..." maxlength="30">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-quote-right"></i> 你的心里话</label>
+                <textarea id="messageInput" placeholder="写下你想说的话... 匿名发布，只有搜索名字才能看到哦" maxlength="200"></textarea>
+            </div>
+            <button class="btn" id="submitBtn"><i class="fas fa-paper-plane"></i> 匿名发送表白</button>
+            <p style="font-size:0.75rem; color:#b34e6e; margin-top:0.8rem; text-align:center;">
+                <i class="fas fa-shield-alt"></i> 完全匿名 · 不会显示你的信息
+            </p>
+        </div>
+
+        <!-- 最新表白预览 -->
+        <div style="margin-top: 1.8rem;">
+            <h3 style="color:#ad1457; margin-bottom:0.8rem;"><i class="fas fa-clock"></i> 最近匿名表白</h3>
+            <div class="messages-list" id="recentMessages"></div>
+        </div>
+    </div>
+
+    <!-- 搜表白面板 -->
+    <div class="panel" id="searchPanel">
+        <div class="message-card">
+            <div class="input-group">
+                <label><i class="fas fa-search"></i> 输入你的名字或昵称</label>
+                <input type="text" id="searchNameInput" placeholder="看看有没有人偷偷向你表白...">
+            </div>
+            <button class="btn" id="searchBtn"><i class="fas fa-heart"></i> 查找表白</button>
+            <button class="btn btn-secondary" id="clearSearchBtn"><i class="fas fa-times"></i> 清除结果</button>
+        </div>
+        <div style="margin-top: 1.5rem;">
+            <h3 style="color:#ad1457; margin-bottom:0.8rem;" id="searchResultTitle">
+                <i class="fas fa-inbox"></i> 搜索结果
+            </h3>
+            <div class="messages-list" id="searchResults"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 数据存储 ----------
+        // 使用 localStorage 保存表白数据（浏览器本地存储）
+        const STORAGE_KEY = 'love_wall_messages';
+
+        // 表白数据结构：{ id, toName, message, timestamp }
+        let messages = [];
+
+        // 从 localStorage 加载数据
+        function loadMessages() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    messages = JSON.parse(stored);
+                } catch (e) {
+                    messages = [];
+                }
+            } else {
+                // 初始化一些示例表白，让页面不空
+                messages = [
+                    {
+                        id: Date.now() + 1,
+                        toName: '小明',
+                        message: '每次看到你认真看书的样子，都觉得世界很安静美好。',
+                        timestamp: Date.now() - 3600000
+                    },
+                    {
+                        id: Date.now() + 2,
+                        toName: '图书馆靠窗女孩',
+                        message: '你常穿的那件蓝色外套，让我觉得冬天很温暖。',
+                        timestamp: Date.now() - 7200000
+                    },
+                    {
+                        id: Date.now() + 3,
+                        toName: '隔壁班小李',
+                        message: '你打球的样子真的很帅，虽然你可能不认识我。',
+                        timestamp: Date.now() - 10800000
+                    }
+                ];
+                saveMessages();
+            }
+        }
+
+        // 保存到 localStorage
+        function saveMessages() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+        }
+
+        // 添加新表白
+        function addMessage(toName, messageText) {
+            const newMsg = {
+                id: Date.now(),
+                toName: toName.trim(),
+                message: messageText.trim(),
+                timestamp: Date.now()
+            };
+            messages.unshift(newMsg); // 最新添加的放在最前面
+            saveMessages();
+            return newMsg;
+        }
+
+        // 搜索表白（根据名字模糊匹配）
+        function searchMessages(name) {
+            if (!name.trim()) return [];
+            const keyword = name.trim().toLowerCase();
+            return messages.filter(msg => 
+                msg.toName.toLowerCase().includes(keyword)
+            );
+        }
+
+        // 获取最近N条表白
+        function getRecentMessages(count = 5) {
+            return messages.slice(0, count);
+        }
+
+        // ---------- UI 渲染 ----------
+        const recentContainer = document.getElementById('recentMessages');
+        const searchResultsContainer = document.getElementById('searchResults');
+        const searchResultTitle = document.getElementById('searchResultTitle');
+
+        // 格式化时间
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+            return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+        }
+
+        // 渲染表白卡片列表
+        function renderMessageList(container, msgArray, highlightName = '') {
+            if (!container) return;
+            if (!msgArray || msgArray.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="far fa-heart" style="font-size:2rem; opacity:0.5;"></i><p style="margin-top:0.5rem;">还没有表白呢～ 去写一条吧</p></div>`;
+                return;
+            }
+
+            let html = '';
+            msgArray.forEach(msg => {
+                // 高亮搜索关键词
+                let displayToName = msg.toName;
+                if (highlightName) {
+                    const regex = new RegExp(`(${highlightName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                    displayToName = msg.toName.replace(regex, '<span class="search-highlight">$1</span>');
+                }
+
+                html += `
+                    <div class="message-bubble">
+                        <div class="message-header">
+                            <span><i class="fas fa-heart" style="color:#e91e63; margin-right:4px;"></i> 致：<span class="to-name">${displayToName}</span></span>
+                            <span style="font-size:0.7rem; color:#b0809a;">匿名</span>
+                        </div>
+                        <div class="message-text">“${msg.message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}”</div>
+                        <div class="message-time">🕒 ${formatTime(msg.timestamp)}</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // 刷新最近表白
+        function refreshRecent() {
+            const recent = getRecentMessages(5);
+            renderMessageList(recentContainer, recent);
+        }
+
+        // 刷新搜索结果
+        function refreshSearchResults(name = '') {
+            if (!name.trim()) {
+                searchResultsContainer.innerHTML = `<div class="empty-state"><i class="fas fa-search" style="font-size:2rem; opacity:0.5;"></i><p>输入名字后点击查找</p></div>`;
+                searchResultTitle.innerHTML = '<i class="fas fa-inbox"></i> 搜索结果';
+                return;
+            }
+            const results = searchMessages(name);
+            searchResultTitle.innerHTML = `<i class="fas fa-inbox"></i> 找到 ${results.length} 条关于“${name}”的表白`;
+            renderMessageList(searchResultsContainer, results, name);
+        }
+
+        // ---------- 事件绑定与初始化 ----------
+        const tabWriteBtn = document.getElementById('tabWriteBtn');
+        const tabSearchBtn = document.getElementById('tabSearchBtn');
+        const writePanel = document.getElementById('writePanel');
+        const searchPanel = document.getElementById('searchPanel');
+
+        const toNameInput = document.getElementById('toNameInput');
+        const messageInput = document.getElementById('messageInput');
+        const submitBtn = document.getElementById('submitBtn');
+
+        const searchNameInput = document.getElementById('searchNameInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+        // 选项卡切换
+        tabWriteBtn.addEventListener('click', () => {
+            tabWriteBtn.classList.add('active');
+            tabSearchBtn.classList.remove('active');
+            writePanel.classList.add('active');
+            searchPanel.classList.remove('active');
+            refreshRecent(); // 每次切回来刷新
+        });
+
+        tabSearchBtn.addEventListener('click', () => {
+            tabSearchBtn.classList.add('active');
+            tabWriteBtn.classList.remove('active');
+            searchPanel.classList.add('active');
+            writePanel.classList.remove('active');
+            // 保留之前的搜索结果，不清空
+        });
+
+        // 提交表白
+        submitBtn.addEventListener('click', () => {
+            const toName = toNameInput.value.trim();
+            const message = messageInput.value.trim();
+
+            if (!toName) {
+                alert('请输入表白对象的名字哦～');
+                toNameInput.focus();
+                return;
+            }
+            if (!message) {
+                alert('写点什么吧，哪怕一句简单的“我喜欢你”💕');
+                messageInput.focus();
+                return;
+            }
+            if (toName.length > 30) {
+                alert('名字太长啦，精简一点吧');
+                return;
+            }
+            if (message.length > 200) {
+                alert('心里话超过200字啦，精简一下更动人');
+                return;
+            }
+
+            addMessage(toName, message);
+            
+            // 清空表单
+            toNameInput.value = '';
+            messageInput.value = '';
+            
+            // 刷新最近列表
+            refreshRecent();
+            
+            // 轻提示
+            alert('💌 表白已匿名发送！对方搜索自己名字时就能看到。');
+        });
+
+        // 搜索表白
+        searchBtn.addEventListener('click', () => {
+            const name = searchNameInput.value.trim();
+            if (!name) {
+                alert('请输入要搜索的名字');
+                return;
+            }
+            refreshSearchResults(name);
+        });
+
+        // 清除搜索结果
+        clearSearchBtn.addEventListener('click', () => {
+            searchNameInput.value = '';
+            searchResultsContainer.innerHTML = `<div class="empty-state"><i class="fas fa-search" style="font-size:2rem; opacity:0.5;"></i><p>输入名字后点击查找</p></div>`;
+            searchResultTitle.innerHTML = '<i class="fas fa-inbox"></i> 搜索结果';
+        });
+
+        // 回车搜索
+        searchNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchBtn.click();
+            }
+        });
+
+        // 初始化加载
+        loadMessages();
+        refreshRecent();
+        // 默认搜索框为空
+        searchResultsContainer.innerHTML = `<div class="empty-state"><i class="fas fa-search" style="font-size:2rem; opacity:0.5;"></i><p>输入名字后点击查找</p></div>`;
+    })();
+</script>
+</body>
+</html>
