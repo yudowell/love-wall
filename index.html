@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>💌 匿名表白墙 · 悄悄话公开栏</title>
+    <title>💌 匿名表白墙 · Anonymous Confession Wall</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -37,6 +37,40 @@
             z-index: 0;
         }
 
+        .language-switch {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            z-index: 10;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid #f8bbd0;
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 650;
+            cursor: pointer;
+            color: #ad1457;
+            transition: all 0.2s;
+            backdrop-filter: blur(5px);
+        }
+
+        .lang-btn.active {
+            background: #e91e63;
+            color: white;
+            border-color: #e91e63;
+            box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3);
+        }
+
+        .lang-btn:hover:not(.active) {
+            background: white;
+            border-color: #e91e63;
+        }
+
         .container {
             max-width: 750px;
             width: 100%;
@@ -62,6 +96,7 @@
             justify-content: center;
             gap: 0.5rem;
             letter-spacing: 1px;
+            flex-wrap: wrap;
         }
 
         .sub-header {
@@ -233,6 +268,8 @@
             margin-bottom: 0.5rem;
             color: #ad1457;
             font-weight: 650;
+            flex-wrap: wrap;
+            gap: 0.3rem;
         }
 
         .to-name {
@@ -287,48 +324,104 @@
             margin: 0.5rem 0;
         }
 
+        /* 多语言支持：默认显示中文，英文类隐藏 */
+        .zh .lang-zh { display: inline; }
+        .zh .lang-en { display: none; }
+        .en .lang-zh { display: none; }
+        .en .lang-en { display: inline; }
+
+        /* 对于块级元素，使用 block */
+        .zh .lang-zh.block, .en .lang-en.block { display: block; }
+
         @media (max-width: 500px) {
             .container {
                 padding: 1.8rem 1.2rem;
+            }
+            .language-switch {
+                top: 0.5rem;
+                right: 0.8rem;
+            }
+            h1 {
+                font-size: 1.8rem;
             }
         }
     </style>
 </head>
 <body>
 <div class="container">
+    <!-- 语言切换按钮 -->
+    <div class="language-switch">
+        <button class="lang-btn active" id="langZhBtn">中文</button>
+        <button class="lang-btn" id="langEnBtn">EN</button>
+    </div>
+
     <h1>
-        <i class="fas fa-heart" style="color: #e91e63;"></i> 匿名表白墙
+        <i class="fas fa-heart" style="color: #e91e63;"></i> 
+        <span class="lang-zh">匿名表白墙</span>
+        <span class="lang-en">Anonymous Confession Wall</span>
     </h1>
     <div class="sub-header">
-        <i class="fas fa-globe"></i> 全网共享 · 搜索你的名字发现惊喜
+        <i class="fas fa-globe"></i> 
+        <span class="lang-zh">全网共享 · 搜索你的名字发现惊喜</span>
+        <span class="lang-en">Shared globally · Search your name for a surprise</span>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" id="tabWriteBtn"><i class="fas fa-pen-fancy"></i> 写表白</button>
-        <button class="tab-btn" id="tabSearchBtn"><i class="fas fa-search"></i> 搜表白</button>
+        <button class="tab-btn active" id="tabWriteBtn">
+            <i class="fas fa-pen-fancy"></i> 
+            <span class="lang-zh">写表白</span>
+            <span class="lang-en">Write</span>
+        </button>
+        <button class="tab-btn" id="tabSearchBtn">
+            <i class="fas fa-search"></i> 
+            <span class="lang-zh">搜表白</span>
+            <span class="lang-en">Search</span>
+        </button>
     </div>
 
     <!-- 写表白面板 -->
     <div class="panel active" id="writePanel">
         <div class="message-card">
             <div class="input-group">
-                <label><i class="fas fa-user-heart"></i> 表白对象（对方的名字/昵称）</label>
-                <input type="text" id="toNameInput" placeholder="例如：小明、图书馆靠窗的女孩..." maxlength="30">
+                <label>
+                    <i class="fas fa-user-heart"></i> 
+                    <span class="lang-zh">表白对象（对方的名字/昵称）</span>
+                    <span class="lang-en">Crush's name / nickname</span>
+                </label>
+                <input type="text" id="toNameInput" placeholder="小明 / John..." maxlength="30">
             </div>
             <div class="input-group">
-                <label><i class="fas fa-quote-right"></i> 你的心里话</label>
-                <textarea id="messageInput" placeholder="写下你想说的话... 完全匿名发布" maxlength="200"></textarea>
+                <label>
+                    <i class="fas fa-quote-right"></i> 
+                    <span class="lang-zh">你的心里话</span>
+                    <span class="lang-en">Your message</span>
+                </label>
+                <textarea id="messageInput" placeholder="写下你想说的话... / Write something..." maxlength="200"></textarea>
             </div>
-            <button class="btn" id="submitBtn"><i class="fas fa-paper-plane"></i> 匿名发送表白</button>
+            <button class="btn" id="submitBtn">
+                <i class="fas fa-paper-plane"></i> 
+                <span class="lang-zh">匿名发送表白</span>
+                <span class="lang-en">Send Anonymously</span>
+            </button>
             <p style="font-size:0.75rem; color:#b34e6e; margin-top:0.8rem; text-align:center;">
-                <i class="fas fa-shield-alt"></i> 完全匿名 · 所有人都能看到
+                <i class="fas fa-shield-alt"></i> 
+                <span class="lang-zh">完全匿名 · 所有人都能看到</span>
+                <span class="lang-en">100% Anonymous · Visible to everyone</span>
             </p>
         </div>
 
         <div style="margin-top: 1.8rem;">
-            <h3 style="color:#ad1457; margin-bottom:0.8rem;"><i class="fas fa-clock"></i> 最新匿名表白</h3>
+            <h3 style="color:#ad1457; margin-bottom:0.8rem;">
+                <i class="fas fa-clock"></i> 
+                <span class="lang-zh">最新匿名表白</span>
+                <span class="lang-en">Latest Confessions</span>
+            </h3>
             <div class="messages-list" id="recentMessages">
-                <div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i> 加载中...</div>
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-pulse"></i> 
+                    <span class="lang-zh">加载中...</span>
+                    <span class="lang-en">Loading...</span>
+                </div>
             </div>
         </div>
     </div>
@@ -337,18 +430,38 @@
     <div class="panel" id="searchPanel">
         <div class="message-card">
             <div class="input-group">
-                <label><i class="fas fa-search"></i> 输入你的名字或昵称</label>
-                <input type="text" id="searchNameInput" placeholder="看看有没有人偷偷向你表白...">
+                <label>
+                    <i class="fas fa-search"></i> 
+                    <span class="lang-zh">输入你的名字或昵称</span>
+                    <span class="lang-en">Enter your name or nickname</span>
+                </label>
+                <input type="text" id="searchNameInput" placeholder="你的名字 / Your name...">
             </div>
-            <button class="btn" id="searchBtn"><i class="fas fa-heart"></i> 查找表白</button>
-            <button class="btn btn-secondary" id="clearSearchBtn"><i class="fas fa-times"></i> 清除结果</button>
+            <button class="btn" id="searchBtn">
+                <i class="fas fa-heart"></i> 
+                <span class="lang-zh">查找表白</span>
+                <span class="lang-en">Search Confessions</span>
+            </button>
+            <button class="btn btn-secondary" id="clearSearchBtn">
+                <i class="fas fa-times"></i> 
+                <span class="lang-zh">清除结果</span>
+                <span class="lang-en">Clear Results</span>
+            </button>
         </div>
         <div style="margin-top: 1.5rem;">
             <h3 style="color:#ad1457; margin-bottom:0.8rem;" id="searchResultTitle">
-                <i class="fas fa-inbox"></i> 搜索结果
+                <i class="fas fa-inbox"></i> 
+                <span class="lang-zh">搜索结果</span>
+                <span class="lang-en">Search Results</span>
             </h3>
             <div class="messages-list" id="searchResults">
-                <div class="empty-state"><i class="fas fa-search" style="font-size:2rem; opacity:0.5;"></i><p>输入名字后点击查找</p></div>
+                <div class="empty-state">
+                    <i class="fas fa-search" style="font-size:2rem; opacity:0.5;"></i>
+                    <p>
+                        <span class="lang-zh">输入名字后点击查找</span>
+                        <span class="lang-en">Enter a name and click search</span>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -360,28 +473,65 @@
         const SUPABASE_URL = 'https://drkzfmjnheybdhwhwssr.supabase.co'
         const SUPABASE_ANON_KEY = 'sb_publishable_PT_ZFr1sbaMvh9_rgWDLoA_s5DR2GTF'
         
-        // 初始化 Supabase 客户端
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+        // ==================== 语言管理 ====================
+        let currentLang = 'zh'; // 默认中文
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            const htmlElement = document.documentElement;
+            htmlElement.classList.remove('zh', 'en');
+            htmlElement.classList.add(lang);
+            
+            // 更新语言按钮状态
+            document.getElementById('langZhBtn').classList.toggle('active', lang === 'zh');
+            document.getElementById('langEnBtn').classList.toggle('active', lang === 'en');
+
+            // 更新输入框占位符
+            updatePlaceholders();
+            
+            // 刷新当前面板的文本
+            refreshCurrentPanel();
+        }
+
+        function updatePlaceholders() {
+            const toNameInput = document.getElementById('toNameInput');
+            const messageInput = document.getElementById('messageInput');
+            const searchNameInput = document.getElementById('searchNameInput');
+            
+            if (currentLang === 'zh') {
+                toNameInput.placeholder = '例如：小明、图书馆靠窗的女孩...';
+                messageInput.placeholder = '写下你想说的话... 完全匿名发布';
+                searchNameInput.placeholder = '看看有没有人偷偷向你表白...';
+            } else {
+                toNameInput.placeholder = 'e.g. John, the girl in the library...';
+                messageInput.placeholder = 'Write your message... 100% anonymous';
+                searchNameInput.placeholder = 'See if someone secretly likes you...';
+            }
+        }
+
+        function refreshCurrentPanel() {
+            const writePanel = document.getElementById('writePanel');
+            const searchPanel = document.getElementById('searchPanel');
+            
+            if (writePanel.classList.contains('active')) {
+                refreshRecent();
+            }
+            // 搜索面板保持之前的结果不变
+        }
+
         // ==================== 数据操作 ====================
-        
-        // 保存表白到 Supabase
         async function saveMessage(toName, messageText) {
             const { data, error } = await supabase
                 .from('love_messages')
-                .insert([
-                    { 
-                        to_name: toName.trim(), 
-                        message: messageText.trim() 
-                    }
-                ])
+                .insert([{ to_name: toName.trim(), message: messageText.trim() }])
                 .select()
             
             if (error) throw error
             return data
         }
 
-        // 获取最新表白
         async function getRecentMessages(limit = 20) {
             const { data, error } = await supabase
                 .from('love_messages')
@@ -393,7 +543,6 @@
             return data
         }
 
-        // 搜索表白
         async function searchMessages(name) {
             if (!name.trim()) return []
             
@@ -417,16 +566,66 @@
             const date = new Date(dateString);
             const now = new Date();
             const diff = now - date;
-            if (diff < 60000) return '刚刚';
-            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
-            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
-            return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+            
+            if (currentLang === 'zh') {
+                if (diff < 60000) return '刚刚';
+                if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+                if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+                return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+            } else {
+                if (diff < 60000) return 'Just now';
+                if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+                if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+        }
+
+        function getUITexts() {
+            if (currentLang === 'zh') {
+                return {
+                    to: '致：',
+                    anonymous: '匿名',
+                    noMessages: '还没有表白呢～ 去写一条吧',
+                    loadFailed: '加载失败，请检查网络连接或刷新页面',
+                    searchFailed: '搜索失败，请稍后重试',
+                    searchPrompt: '输入名字后点击查找',
+                    foundResults: (count, name) => `找到 ${count} 条关于"${name}"的表白`,
+                    searchResults: '搜索结果',
+                    sending: '发送中...',
+                    sendSuccess: '💌 表白已匿名发送！所有人都能看到啦～',
+                    sendFailed: '发送失败，请检查网络后重试',
+                    sendButton: '匿名发送表白',
+                    emptyNameError: '请输入表白对象的名字哦～',
+                    emptyMessageError: '写点什么吧，哪怕一句简单的"我喜欢你"💕',
+                    emptySearchError: '请输入要搜索的名字',
+                };
+            } else {
+                return {
+                    to: 'To: ',
+                    anonymous: 'Anonymous',
+                    noMessages: 'No confessions yet ~ Write one!',
+                    loadFailed: 'Failed to load. Check connection or refresh.',
+                    searchFailed: 'Search failed. Try again later.',
+                    searchPrompt: 'Enter a name and click search',
+                    foundResults: (count, name) => `Found ${count} confession(s) for "${name}"`,
+                    searchResults: 'Search Results',
+                    sending: 'Sending...',
+                    sendSuccess: '💌 Confession sent anonymously! Everyone can see it now~',
+                    sendFailed: 'Send failed. Check connection and retry.',
+                    sendButton: 'Send Anonymously',
+                    emptyNameError: 'Please enter the name of your crush~',
+                    emptyMessageError: 'Write something, even a simple "I like you" 💕',
+                    emptySearchError: 'Please enter a name to search',
+                };
+            }
         }
 
         function renderMessageList(container, msgArray, highlightName = '') {
             if (!container) return;
+            const texts = getUITexts();
+            
             if (!msgArray || msgArray.length === 0) {
-                container.innerHTML = `<div class="empty-state"><i class="far fa-heart" style="font-size:2rem; opacity:0.5;"></i><p>还没有表白呢～ 去写一条吧</p></div>`;
+                container.innerHTML = `<div class="empty-state"><i class="far fa-heart" style="font-size:2rem; opacity:0.5;"></i><p>${texts.noMessages}</p></div>`;
                 return;
             }
 
@@ -446,8 +645,8 @@
                 html += `
                     <div class="message-bubble">
                         <div class="message-header">
-                            <span><i class="fas fa-heart" style="color:#e91e63; margin-right:4px;"></i> 致：<span class="to-name">${displayToName}</span></span>
-                            <span style="font-size:0.7rem; color:#b0809a;">匿名</span>
+                            <span><i class="fas fa-heart" style="color:#e91e63; margin-right:4px;"></i> ${texts.to}<span class="to-name">${displayToName}</span></span>
+                            <span style="font-size:0.7rem; color:#b0809a;">${texts.anonymous}</span>
                         </div>
                         <div class="message-text">"${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}"</div>
                         <div class="message-time">🕒 ${formatTime(createdAt)}</div>
@@ -459,28 +658,35 @@
 
         async function refreshRecent() {
             try {
-                recentContainer.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i> 加载中...</div>';
+                const texts = getUITexts();
+                recentContainer.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i> ${currentLang === 'zh' ? '加载中...' : 'Loading...'}</div>`;
                 const messages = await getRecentMessages(20);
                 renderMessageList(recentContainer, messages);
             } catch (error) {
                 console.error('加载失败:', error);
-                recentContainer.innerHTML = '<div class="error-message">加载失败，请检查网络连接或刷新页面</div>';
+                const texts = getUITexts();
+                recentContainer.innerHTML = `<div class="error-message">${texts.loadFailed}</div>`;
             }
         }
 
         async function performSearch(name) {
             try {
-                searchResultsContainer.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i> 搜索中...</div>';
+                const texts = getUITexts();
+                searchResultsContainer.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i> ${currentLang === 'zh' ? '搜索中...' : 'Searching...'}</div>`;
                 const results = await searchMessages(name);
-                searchResultTitle.innerHTML = `<i class="fas fa-inbox"></i> 找到 ${results.length} 条关于"${name}"的表白`;
+                searchResultTitle.innerHTML = `<i class="fas fa-inbox"></i> ${texts.foundResults(results.length, name)}`;
                 renderMessageList(searchResultsContainer, results, name);
             } catch (error) {
                 console.error('搜索失败:', error);
-                searchResultsContainer.innerHTML = '<div class="error-message">搜索失败，请稍后重试</div>';
+                const texts = getUITexts();
+                searchResultsContainer.innerHTML = `<div class="error-message">${texts.searchFailed}</div>`;
             }
         }
 
         // ==================== 事件绑定 ====================
+        const langZhBtn = document.getElementById('langZhBtn');
+        const langEnBtn = document.getElementById('langEnBtn');
+        
         const tabWriteBtn = document.getElementById('tabWriteBtn');
         const tabSearchBtn = document.getElementById('tabSearchBtn');
         const writePanel = document.getElementById('writePanel');
@@ -494,6 +700,11 @@
         const searchBtn = document.getElementById('searchBtn');
         const clearSearchBtn = document.getElementById('clearSearchBtn');
 
+        // 语言切换
+        langZhBtn.addEventListener('click', () => switchLanguage('zh'));
+        langEnBtn.addEventListener('click', () => switchLanguage('en'));
+
+        // 选项卡切换
         tabWriteBtn.addEventListener('click', () => {
             tabWriteBtn.classList.add('active');
             tabSearchBtn.classList.remove('active');
@@ -509,50 +720,56 @@
             writePanel.classList.remove('active');
         });
 
+        // 提交表白
         submitBtn.addEventListener('click', async () => {
+            const texts = getUITexts();
             const toName = toNameInput.value.trim();
             const message = messageInput.value.trim();
 
             if (!toName) {
-                alert('请输入表白对象的名字哦～');
+                alert(texts.emptyNameError);
                 return;
             }
             if (!message) {
-                alert('写点什么吧，哪怕一句简单的"我喜欢你"💕');
+                alert(texts.emptyMessageError);
                 return;
             }
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 发送中...';
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> ${texts.sending}`;
 
             try {
                 await saveMessage(toName, message);
                 toNameInput.value = '';
                 messageInput.value = '';
-                alert('💌 表白已匿名发送！所有人都能看到啦～');
+                alert(texts.sendSuccess);
                 await refreshRecent();
             } catch (error) {
                 console.error('发送失败:', error);
-                alert('发送失败，请检查网络后重试');
+                alert(texts.sendFailed);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 匿名发送表白';
+                submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> ${texts.sendButton}`;
             }
         });
 
+        // 搜索表白
         searchBtn.addEventListener('click', () => {
+            const texts = getUITexts();
             const name = searchNameInput.value.trim();
             if (!name) {
-                alert('请输入要搜索的名字');
+                alert(texts.emptySearchError);
                 return;
             }
             performSearch(name);
         });
 
+        // 清除搜索结果
         clearSearchBtn.addEventListener('click', () => {
+            const texts = getUITexts();
             searchNameInput.value = '';
-            searchResultsContainer.innerHTML = '<div class="empty-state"><i class="fas fa-search" style="font-size:2rem; opacity:0.5;"></i><p>输入名字后点击查找</p></div>';
-            searchResultTitle.innerHTML = '<i class="fas fa-inbox"></i> 搜索结果';
+            searchResultsContainer.innerHTML = `<div class="empty-state"><i class="fas fa-search" style="font-size:2rem; opacity:0.5;"></i><p>${texts.searchPrompt}</p></div>`;
+            searchResultTitle.innerHTML = `<i class="fas fa-inbox"></i> ${texts.searchResults}`;
         });
 
         searchNameInput.addEventListener('keypress', (e) => {
@@ -561,7 +778,8 @@
             }
         });
 
-        // 初始化加载
+        // 初始化
+        updatePlaceholders();
         refreshRecent();
     })();
 </script>
